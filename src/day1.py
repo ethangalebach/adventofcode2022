@@ -1,4 +1,4 @@
-import os
+import utils
 import bisect
 
 def get_part1_answer(input_path: str) -> float:
@@ -32,13 +32,9 @@ def get_part2_answer(input_path: str, n_elves: int) -> float:
     return sum(top_n_calories)
 
 if __name__ == "__main__":
-    filename = os.path.basename(__file__)
-    filename = filename.removesuffix('.py') + '.txt'
-    file_dir = os.path.dirname(os.path.realpath('__file__'))
-    input_path = file_name = os.path.join(file_dir, f'input/{filename}')
-
+    input_path = utils.get_input_path(__file__)
     part1_answer = get_part1_answer(input_path)
-    part2_answer = get_part2_answer(input_path, 3)
+    part2_answer = get_part2_answer(input_path, n_elves=3)
 
     print(
         f"Part 1 Answer: {part1_answer},",
