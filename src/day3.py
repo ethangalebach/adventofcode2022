@@ -20,10 +20,21 @@ def get_shared_item(rucksack: str) -> str:
     if len(shared_items) == 1:
         return shared_items.pop()
     else:
-        raise Exception('more or less than one shared item')
+        raise Exception(f'more or less than one shared item: {shared_items}')
+
+def get_badge(elf_group: list) -> str:
+    badge_options = set(elf_group[0])
+    for rucksack in elf_group[1:]:
+        badge_options = badge_options & set(rucksack)
+    if len(badge_options) == 1:
+        return badge_options.pop()
+    else:
+        raise Exception(f'more or less than one badge option: {badge_options}')
 
 def get_answer(input_path: str, part: int) -> float:
     total_score = 0
+    elf_group = [''] * 3
+    group_position = 0
 
     with open(input_path) as f:
         for line in f:
@@ -32,7 +43,14 @@ def get_answer(input_path: str, part: int) -> float:
                 priority = get_priority(shared_item)
                 total_score += priority
             elif part == 2:
-                pass
+                elf_group[group_position] = line.strip()
+                if group_position == 2:
+                    badge = get_badge(elf_group)
+                    priority = get_priority(badge)
+                    total_score += priority
+                    group_position = 0
+                else:
+                    group_position += 1
             else:
                 raise Exception('not part 1 or 2')
 
