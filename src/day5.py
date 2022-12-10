@@ -1,6 +1,6 @@
 import utils
 
-def create_stacks (stack_rows: list) -> dict:
+def create_stacks(stack_rows: list) -> dict:
     keys_line = stack_rows.pop()
     stacks = {keys_line[i]:[] for i in range(len(keys_line)) if (i + 3) % 4 == 0}
 
@@ -12,31 +12,41 @@ def create_stacks (stack_rows: list) -> dict:
 
     return stacks
 
+def arrange_stacks(stacks: dict, line: str, part:int) -> dict:
+    _, num_crates, _, from_stack, _, to_stack = str.split(line,' ')
+
+    if part == 1:
+        for i in range(int(num_crates)):
+            crate = stacks[from_stack].pop()
+            stacks[to_stack].append(crate)
+
+    elif part == 2:
+        crates = []
+        for i in range(int(num_crates)):
+            crate = stacks[from_stack].pop()
+            crates.insert(0, crate)
+        stacks[to_stack] += crates
+
+    else:
+        raise Exception('not part 1 or 2')
+
 def get_answer(input_path: str, part: int) -> str:
     stacks = {}
     stack_rows = []
     below_stacks = 0
-    if part == 1:
-        with open(input_path) as f:
-            for line in f:
-                if not below_stacks:
-                    stack_rows.append(line)
-                    if line[1] == '1':
-                        stacks = create_stacks(stack_rows)
-                        below_stacks = 1
-                elif line.strip():
-                    _, num_crates, _, from_stack, _, to_stack = str.split(line.strip(),' ')
-                    for i in range(int(num_crates)):
-                        crate = stacks[from_stack].pop()
-                        stacks[to_stack].append(crate)
-    elif part == 2:
-        pass
-    else:
-        raise Exception('not part 1 or 2')
+
+    with open(input_path) as f:
+        for line in f:
+            if not below_stacks:
+                stack_rows.append(line)
+                if line[1] == '1':
+                    stacks = create_stacks(stack_rows)
+                    below_stacks = 1
+
+            elif line.strip():
+                arrange_stacks(stacks, line.strip(), part)
 
     return ''.join([stacks[k].pop() for k in stacks])
-
-
 
 if __name__ == "__main__":
     input_path = utils.get_input_path(__file__)
