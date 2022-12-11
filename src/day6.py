@@ -1,24 +1,22 @@
 import utils
 
-def create_stacks(stack_rows: list) -> dict:
-    pass
-
-
 def get_answer(input_path: str, part: int) -> str:
     total_score = 0
+    if part == 1:
+        marker_length = 4
+    elif part == 2:
+        marker_length = 14
+    else:
+        raise Exception('not part 1 or 2')
 
     with open(input_path) as f:
         line = f.readline()
-        if part == 1:
-            for end_index in range(4, len(line)):
-                possible_marker = line[end_index-4:end_index]
-                if len(set(possible_marker)) == 4:
-                    total_score = end_index
-                    break
-        elif part == 2:
-            pass
-        else:
-            raise Exception('not part 1 or 2')
+
+    for end_index in range(marker_length, len(line)):
+        possible_marker = line[end_index-marker_length:end_index]
+        if len(set(possible_marker)) == marker_length:
+            total_score = end_index
+            break
 
     return total_score
 
