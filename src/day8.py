@@ -79,9 +79,6 @@ def get_answer(input_path: str, part: int) -> str:
     else:
         raise Exception('not part 1 or 2')
 
-    with open(input_path) as f:
-        line = f.readline()
-
 if __name__ == "__main__":
     input_path = utils.get_input_path(__file__)
     part1_answer = get_answer(input_path, part=1)
