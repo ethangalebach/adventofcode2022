@@ -15,7 +15,7 @@ class Rope:
                     steps = int(line.strip()[2:])
                     self.move(dir, steps)
 
-    def get_tail_visited_locs(self):
+    def get_tail_visited_locs(self) -> set:
         if self.child:
             return self.child.get_tail_visited_locs()
         return self.visited_locs
@@ -132,7 +132,7 @@ class Rope:
             if self.child.loc[1] > self.loc[1]:
                 self.child.move('DL')
 
-def get_answer(input_path: str, part: int) -> str:
+def get_answer(input_path: str, part: int) -> int:
     if part == 1:
         knots = 2
     elif part == 2:
