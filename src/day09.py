@@ -9,11 +9,16 @@ class Rope:
 
     def travel_route(self, input_path:str):
         with open(input_path) as f:
-            for num, line in enumerate(f):
+            for line in f:
                 if line.strip():
                     dir = line[0]
                     steps = int(line.strip()[2:])
                     self.move(dir, steps)
+
+    def get_tail_visited_locs(self):
+        if self.child:
+            return self.child.get_tail_visited_locs()
+        return self.visited_locs
 
     def move(self, dir:str, steps:int=1):
         for i in range(steps):
@@ -134,12 +139,9 @@ def get_answer(input_path: str, part: int) -> str:
         knots = 10
     else:
         raise Exception('not part 1 or 2')
-
     rope = Rope(knots)
     rope.travel_route(input_path)
-    while rope.child:
-        rope = rope.child
-    return len(rope.visited_locs)
+    return len(rope.get_tail_visited_locs())
 
 if __name__ == "__main__":
     input_path = utils.get_input_path(__file__)
