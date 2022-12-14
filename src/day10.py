@@ -1,5 +1,25 @@
 import utils
 
+def print_crt_image(path:str):
+    cycle = 0
+    register = 1
+    row = []
+    with open(path) as f:
+        for line in f:
+            pixels = 2 if line.startswith('addx') else 1
+            for i in range(pixels):
+                if cycle in range(register-1, register+2):
+                    row.append('#')
+                else:
+                    row.append('.')
+                cycle += 1
+                if cycle % 40 == 0:
+                        cycle = 0
+                        print(' '.join(row))
+                        row = []
+            if line.startswith('addx'):
+                register += int(str.split(line.strip())[1])
+
 def get_signal_strength(path:str):
     cycle = 0
     register = 1
@@ -30,9 +50,9 @@ if __name__ == "__main__":
     test_answer = get_answer(test_path, part=1)
     assert test_answer == 13140, f"got signal strength of {test_answer} on {test_path}, should be 13140"
     part1_answer = get_answer(input_path, part=1)
-    part2_answer = get_answer(input_path, part=2)
 
     print(
         f"Part 1 Answer: {part1_answer},",
-        f"Part 2 Answer: {part2_answer}"
+        f"Part 2 Answer:",
     )
+    print_crt_image(input_path)
