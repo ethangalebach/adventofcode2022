@@ -24,7 +24,6 @@ class Graph:
                         self.end_coord = (len(grid), col)
                         row[col] = 'z'
                 grid.append(row)
-
         return grid
 
     def _create_coord_to_node_map(self, grid):
@@ -69,11 +68,11 @@ class Graph:
     def get_shortest_path(self, start_coord=None):
         if not start_coord: start_coord = self.start_coord
         visited = set()
-        start_node = self.coord_to_node_map[self.start_coord]
+        start_node = self.coord_to_node_map[start_coord]
         tentative_paths = [(999_999,node.coord,()) for node in self.graph if node != start_node]
         heapq.heapify(tentative_paths)
         heapq.heappush(tentative_paths, (0,start_node.coord,()))
-        while True:
+        while len(visited) < len(self.graph):
             score, coord, path = heapq.heappop(tentative_paths)
             if coord == self.end_coord:
                 return path
@@ -83,6 +82,15 @@ class Graph:
                 for adj_node in self.graph[cur_node]:
                     heapq.heappush(tentative_paths, (score+1, adj_node.coord, path + (adj_node.coord,)))
 
+    def get_path_with_ideal_trailhead(self):
+        ideal_path = self.get_shortest_path()
+        for node in self.graph:
+            if node.height == 'a':
+                path = self.get_shortest_path(node.coord)
+                if path and len(path) < len(ideal_path):
+                    ideal_path = path
+        return ideal_path
+
 @dataclass(frozen=True,eq=True)
 class Node:
     height: str
@@ -90,12 +98,11 @@ class Node:
 
 
 def get_answer(input_path: str, part: int) -> int:
+    map = Graph(input_path)
     if part == 1:
-        map = Graph(input_path)
-        #return [(k.height, k.coord, v) for k, v in map.graph[map.coord_to_node_map[map.end_coord]].items()]
         return len(map.get_shortest_path())
     elif part == 2:
-        pass
+        return (len(map.get_path_with_ideal_trailhead()))
     else:
         raise Exception('not part 1 or 2')
 
