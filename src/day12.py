@@ -1,67 +1,99 @@
 import utils
 from itertools import product
+import heapq
+from dataclasses import dataclass
 
-class Map:
+class Graph:
     def __init__(self, path:str):
-        self.cur_coord = (None, None)
-        self.target_coord = (None, None)
-        self.map = self._parse_map(path)
+        self.start_coord = (None, None)
+        self.end_coord = (None, None)
+        self.grid = self._parse_grid(path)
+        self.coord_to_node_map = self._create_coord_to_node_map(self.grid)
+        self.graph = self._create_graph(self.grid, self.coord_to_node_map)
 
-    def _parse_map(self, path):
-        heights = []
+    def _parse_grid(self, path):
+        grid = []
         with open(path) as f:
             for line in f:
                 row = list(line.strip())
                 for col, c in enumerate(row):
                     if c == 'S':
-                        self.cur_coord = (len(heights), col)
+                        self.start_coord = (len(grid), col)
                         row[col] = 'a'
                     if c == 'E':
-                        self.target_coord = (len(heights), col)
+                        self.end_coord = (len(grid), col)
                         row[col] = 'z'
-                heights.append(row)
+                grid.append(row)
 
-        return self._create_map(heights)
+        return grid
 
-    def _create_map(self, heights):
-        num_rows = len(heights)
-        num_cols = len(heights[0])
-        map = [[None] * num_cols] * num_rows
+    def _create_coord_to_node_map(self, grid):
+        map = {}
+        num_rows = len(grid)
+        num_cols = len(grid[0])
         for i,j in product(range(num_rows), range(num_cols)):
-            left = heights[i][j-1] if j > 0 else None
-            right = heights[i][j+1] if j < num_cols-1 else None
-            up = heights[i-1][j] if i == 0 else None
-            down = heights[i+1][j] if i < num_rows-1 else None
-            map[i][j] = Point(heights[i][j],left,right,up,down)
+            node = Node(height=grid[i][j],coord=(i,j))
+            map[(i,j)] = node
+        return map
 
-    def get_shortest_path(self):
-        shortest_path = []
-        #TODO
-        return shortest_path
+    def _create_graph(self, grid, map):
+        graph = {}
+        for _, node in map.items():
+            if not graph.get(node): graph[node] = set()
+            graph = self._add_edges(node,graph,grid,map)
+        return graph
 
+    def _add_edges(self, node, graph, grid, map):
+        num_rows = len(grid)
+        num_cols = len(grid[0])
+        r = node.coord[0]
+        c = node.coord[1]
+        if c > 0:
+            adj_node = map[(r,c-1)]
+            if ord(node.height) - ord(adj_node.height) >= -1:
+                graph[node].add(adj_node)
+        if c < num_cols-1:
+            adj_node = map[(r,c+1)]
+            if ord(node.height) - ord(adj_node.height) >= -1:
+                graph[node].add(adj_node)
+        if r > 0:
+            adj_node = map[(r-1,c)]
+            if ord(node.height) - ord(adj_node.height) >= -1:
+                graph[node].add(adj_node)
+        if r < num_rows-1:
+            adj_node = map[(r+1,c)]
+            if ord(node.height) - ord(adj_node.height) >= -1:
+                graph[node].add(adj_node)
+        return graph
 
-class Point:
-    def __init__(self,height,left,right,up,down):
-        self.height = height
-        self.left = left
-        self.right = right
-        self.up = up
-        self.down = down
-        self.ranks = self._calc_ranks()
-        self.pref_order =  [k for k, _ in sorted(self.ranks.items(), key=lambda item: item[1])]
+    def get_shortest_path(self, start_coord=None):
+        if not start_coord: start_coord = self.start_coord
+        visited = set()
+        start_node = self.coord_to_node_map[self.start_coord]
+        tentative_paths = [(999_999,node.coord,()) for node in self.graph if node != start_node]
+        heapq.heapify(tentative_paths)
+        heapq.heappush(tentative_paths, (0,start_node.coord,()))
+        while True:
+            score, coord, path = heapq.heappop(tentative_paths)
+            if coord == self.end_coord:
+                return path
+            if coord not in visited:
+                visited.add(coord)
+                cur_node = self.coord_to_node_map[coord]
+                for adj_node in self.graph[cur_node]:
+                    heapq.heappush(tentative_paths, (score+1, adj_node.coord, path + (adj_node.coord,)))
 
-    def _calc_ranks(self):
-        ranks = {}
-        ranks['left'] = max(ord(self.height) - ord(self.left) + 1, -1) if self.left else -1
-        ranks['right'] = max(ord(self.height) - ord(self.right) + 1, -1) if self.right else -1
-        ranks['up'] = max(ord(self.height) - ord(self.up) + 1, -1) if self.up else -1
-        ranks['down'] = max(ord(self.height) - ord(self.down) + 1, -1) if self.down else -1
-        return ranks
+@dataclass(frozen=True,eq=True)
+class Node:
+    height: str
+    coord: tuple[int,int]
+
 
 def get_answer(input_path: str, part: int) -> int:
     if part == 1:
-        map = Map(input_path)
-        return map.target_coord
+        map = Graph(input_path)
+        #return [(k.height, k.coord, v) for k, v in map.graph[map.coord_to_node_map[map.end_coord]].items()]
+        return len(map.get_shortest_path())
     elif part == 2:
         pass
     else:
