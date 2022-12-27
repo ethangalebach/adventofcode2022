@@ -1,7 +1,7 @@
 import utils
 
 class Grid:
-    def __init__(self, path):
+    def __init__(self, path:str):
         self.rock_grid, self.abyss_height = self._parse_rock_grid(path)
         self.sand_grid = {}
 
@@ -61,25 +61,53 @@ class Grid:
             capacity += 1
         return capacity
 
+class GridWithFloor(Grid):
+    def __init__(self, path:str):
+        super().__init__(path)
+        for i in range(self.abyss_height+3):
+            self.rock_grid[(500-i,self.abyss_height+2)] = '#'
+            self.rock_grid[(500+i,self.abyss_height+2)] = '#'
+
+    def drop_sand(self):
+        loc = (500,0)
+        if self.sand_grid.get(loc): return False
+        new_loc = self._fall(loc)
+        while new_loc != loc:
+            loc = new_loc
+            new_loc = self._fall(loc)
+        self.sand_grid[new_loc] = 'o'
+        return True
+
+    def print_sand_grid(self):
+        for y in range(0,11):
+            print(''.join(
+                [self.sand_grid.get((x,y)) or '.' for x in range(490,511)]
+            ))
+
 def get_answer(input_path:str, part:int) -> int:
     grid = Grid(input_path)
     if part == 1:
+        grid = Grid(input_path)
         return grid.get_sand_capacity()
     elif part == 2:
-        pass
+        grid_with_floor = GridWithFloor(input_path)
+        return grid_with_floor.get_sand_capacity()
     else:
         raise Exception('not part 1 or 2')
 
 if __name__ == "__main__":
     input_path = utils.get_input_path(__file__)
     test_path = utils.get_test_path(__file__)
-    test_answer = get_answer(test_path, part=1)
-    assert test_answer == 24, f"got sand capacity of {test_answer} on {test_path}, should be 24"
+    test_part1_answer = get_answer(test_path, part=1)
+    assert test_part1_answer == 24, f"got sand capacity of {test_part1_answer} on {test_path}, should be 24"
     part1_answer = get_answer(input_path, part=1)
+    test_part2_answer = get_answer(test_path, part=2)
+    assert test_part2_answer == 93, f"got sand capacity of {test_part2_answer} on {test_path}, should be 93"
     part2_answer = get_answer(input_path, part=2)
 
     print(
-        f"Test Answer: {test_answer},",
+        f"Test Part 1 Answer: {test_part1_answer},",
         f"Part 1 Answer: {part1_answer},",
+        f"Test Part 2 Answer: {test_part2_answer},",
         f"Part 2 Answer: {part2_answer}"
     )
