@@ -33,6 +33,7 @@ class FactoryBlueprints:
         quality_sum = 0
         for num, blueprint in self.blueprints.items():
             factory = Factory(blueprint)
+            print(factory.__dict__)
             max_geode_num = factory.get_max_geodes()
             geodes.append((num, max_geode_num))
             quality_sum += num * max_geode_num
@@ -119,7 +120,7 @@ class Factory:
 
 def get_answer(input_path:str, part:int) -> int:
     factory_blueprints = FactoryBlueprints(input_path)
-    factory = Factory(factory_blueprints.blueprints[1])
+    # factory = Factory(factory_blueprints.blueprints[1])
     if part == 1:
         return factory_blueprints.get_blueprint_geodes()
         # return factory.get_max_geodes()
@@ -130,10 +131,17 @@ def get_answer(input_path:str, part:int) -> int:
 
 if __name__ == "__main__":
     input_path = utils.get_input_path(__file__)
-    part1_answer = get_answer(input_path, part=1)
-    part2_answer = get_answer(input_path, part=2)
+    test_path = utils.get_test_path(__file__)
+    test_part1_answer = get_answer(test_path, part=1)
+    # assert test_part1_answer == 64, f"got surface area of {test_part1_answer} on {test_path}, should be 64"
+    # part1_answer = get_answer(input_path, part=1)
+    # test_part2_answer = get_answer(test_path, part=2)
+    # assert test_part2_answer == 1707, f"got max pressure of {test_part2_answer} on {test_path}, should be 1707"
+    # part2_answer = get_answer(input_path, part=2)
 
     print(
-        f"Part 1 Answer: {part1_answer},",
-        f"Part 2 Answer: {part2_answer}"
+        f"Test Part 1 Answer: {test_part1_answer},",
+        # f"Part 1 Answer: {part1_answer},",
+        # f"Test Part 2 Answer: {test_part2_answer},",
+        # f"Part 2 Answer: {part2_answer}"
     )
